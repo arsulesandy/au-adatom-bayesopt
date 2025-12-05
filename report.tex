@@ -1,0 +1,126 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper, margin=2.5cm, top=2.5cm, bottom=2.0cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage[us,24hr]{datetime}
+\usepackage{fancyhdr}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{palatino}
+\usepackage{siunitx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[
+    unicode,
+    colorlinks=true,
+    urlcolor=NavyBlue,
+    linkcolor=NavyBlue,
+    citecolor=NavyBlue
+]{hyperref}
+
+\fancypagestyle{plain}{
+\fancyhf{}
+\rhead{\footnotesize Version {\ddmmyyyydate\today} at \currenttime}
+\renewcommand{\headrulewidth}{0pt}}
+
+\lstset{language=Python}
+
+\title{
+    \sffamily
+    Report on Project 2B: \\
+    Bayesian optimization for Au adatom on Au(433)
+}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+We map and optimize the potential energy surface (PES) for an Au adatom on vicinal Au(433) using the EMT calculator. The $z$-coordinate of the adatom is relaxed while the surface is frozen. Tasks cover dense PES mapping, local L-BFGS-B searches, Gaussian-process (GP) Bayesian optimization with lower confidence bound (LCB) acquisition, and training an exploratory GP to estimate a diffusion barrier along a specified path.
+
+\section{Methods}
+\paragraph{Energy evaluations} The EMT calculator from \texttt{asap3} is used via ASE. The bare surface energy is subtracted from each configuration. Surface atoms are fixed and the adatom is constrained to move along $z$ with \texttt{FixedLine}; BFGS relaxations are converged to \SI{0.02}{eV/\angstrom}.
+
+\paragraph{Domain and grids} Lateral coordinates are limited to $0<x<16.65653$ and $0<y<2.884996$. A $55\times33$ grid ($\Delta x\approx\SI{0.31}{\angstrom}$, $\Delta y\approx\SI{0.09}{\angstrom}$) is used for the PES map.
+
+\paragraph{Gaussian process model} An RBF kernel with ARD length scales plus a bias term is used. Gamma priors are set on the variance and length scales; the noise variance is fixed at $10^{-5}$. GPs are optimized with up to five restarts. The LCB acquisition $A=-\mu+\beta\sigma$ balances exploration and exploitation.
+
+\section{Task 1: PES mapping}
+The global minimum on the grid is at $(x,y)=(\SI{3.42}{\angstrom}, \SI{0.75}{\angstrom})$ with $E=\SI{0.228}{eV}$. The PES shows the lowest terrace sites along the step edge and higher energies on the ridge. The heatmap is shown in Fig.~\ref{fig:pes}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{artifacts/figures/task1_pes_heatmap.png}
+    \caption{Dense EMT PES for the Au adatom. The red star marks the global minimum.}
+    \label{fig:pes}
+\end{figure}
+
+\section{Task 2: Local search}
+From Fig.~\ref{fig:pes}, the low-energy basin occupies only a small fraction of the unit cell, so a few percent success rate is expected. We launched $250$ L-BFGS-B minimizations from uniformly sampled starting points. Only $2$ runs ($0.8\%$) reached the global basin within \SI{0.2}{\angstrom} of the grid minimum. Energies span from \SI{0.226}{eV} (best) to a median of \SI{0.855}{eV}. The failure rate highlights the difficulty of locating the global minimum with purely local descent.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{artifacts/figures/task2_local_search.png}
+    \caption{Local-search endpoints overlaid on the PES. Colors indicate relaxed energies; the cyan star is the global minimum.}
+    \label{fig:locals}
+\end{figure}
+
+\section{Task 3: Bayesian optimization}
+Bayesian optimization starts from five random samples and runs $35$ acquisitions. Four $\beta$ values were tested with three random seeds each (Table~\ref{tab:bo}). $\beta=2.0$ achieved a $100\%$ hit rate, reaching the global minimum after $\sim21$ iterations on average; smaller $\beta$ converged faster when successful but missed the optimum in one seed. $\beta=5.0$ over-explored and failed to hit the minimum. Priors on the ARD RBF length scales (Gamma with shape 2, scale 1) regularize the kernel toward the terrace length scale in $x$ and shorter steps in $y$, while the variance prior (shape 2, scale 0.5) discourages overconfident fits early in the search.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lccc}
+        $\beta$ & Hit rate & Avg.\ hit iter & Best energy (eV) \\\hline
+        $1.2$ & $0.67$ & $14.5$ & $0.216$ \\
+        $2.0$ & $1.00$ & $20.7$ & $0.216$ \\
+        $3.5$ & $0.33$ & $35.0$ & $0.225$ \\
+        $5.0$ & $0.00$ & -- & $0.383$ \\
+    \end{tabular}
+    \caption{Bayesian optimization performance over three seeds. Hits counted when the best energy fell within \SI{1}{meV} of the grid minimum.}
+    \label{tab:bo}
+\end{table}
+
+Fig.~\ref{fig:bo} shows convergence and the posterior for the best-performing run ($\beta=2.0$). The GP variance is largest near unsampled ridges and deep hollows; the acquisition targets those regions while still refining around the terrace minimum. The global minimum was typically identified by $\sim25$ EMT evaluations (initial five plus roughly 20 BO iterations) in successful runs.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\linewidth]{artifacts/figures/task3_bo_convergence.png}
+    \includegraphics[width=0.95\linewidth]{artifacts/figures/task3_gp_maps.png}
+    \caption{Left: convergence of the best-so-far energy versus iteration for different $\beta$. Right: GP mean, uncertainty, and LCB for the best run; red points are sampled locations and the white star is the grid minimum.}
+    \label{fig:bo}
+\end{figure}
+
+\section{Task 4: GP for transition barriers}
+A general-purpose GP was trained with $\beta=8$ over the full grid using 12 random seeds plus the start/end states $(3.42,0.75)$ and $(11.0,2.1)$. The RMSE against the EMT grid dropped below \SI{0.05}{eV} after about 60 acquisitions and to \SI{0.035}{eV} after 120 acquisitions (134 total training points including seeds), see Fig.~\ref{fig:rmse}.
+
+The diffusion path between the minima was sampled with 120 relaxed points. The true EMT barrier is \SI{0.88}{eV}. The GP from Bayesian optimization underestimates the barrier (\SI{0.63}{eV}) because it focuses on the low-energy basin, while the exploratory GP reproduces the barrier (\SI{0.88}{eV}) with credible intervals spanning the ridge (Fig.~\ref{fig:path}).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{artifacts/figures/task4_rmse_gp.png}
+    \caption{RMSE of the exploratory GP versus acquisition steps using LCB with $\beta=8$.}
+    \label{fig:rmse}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{artifacts/figures/task4_transition_path.png}
+    \caption{Energy along the linear path between global and local minima. Shaded bands show $\pm\sigma$ from the two GP models.}
+    \label{fig:path}
+\end{figure}
+
+\section{Discussion}
+The dense EMT grid provides a clear reference, but local search alone almost always misses the global basin because the PES contains multiple terraces separated by ridges. Bayesian optimization with moderate $\beta$ effectively balances exploration and exploitation; $\beta=2.0$ was the most robust choice, while too much exploration slows or prevents convergence. For property prediction (barriers), an exploratory GP trained against a broad acquisition policy is needed to avoid underestimating high-energy regions that are rarely sampled during global-minimum search.
+
+\section{Reproducibility}
+\begin{itemize}
+    \item A Python~3.12 virtual environment with all dependencies resides in \texttt{assignments/project-2b/.venv312}.
+    \item To regenerate the notebook and figures, run:\\
+    \texttt{JUPYTER\_CONFIG\_DIR=assignments/project-2b/artifacts/jupyter\_config\\JUPYTER\_DATA\_DIR=assignments/project-2b/artifacts/jupyter\_data\\JUPYTER\_RUNTIME\_DIR=assignments/project-2b/artifacts/jupyter\_runtime\\assignments/project-2b/.venv312/bin/jupyter nbconvert --to notebook --execute --inplace assignments/project-2b/project2b\_bayesopt\_solution.ipynb}
+    \item Key metrics are collected in \texttt{assignments/project-2b/artifacts/summary.json}.
+\end{itemize}
+
+\end{document}
