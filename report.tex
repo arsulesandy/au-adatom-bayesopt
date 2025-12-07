@@ -94,9 +94,9 @@ Fig.~\ref{fig:bo} shows convergence and the posterior for the best-performing se
 \end{figure}
 
 \section{Task 4: GP for transition barriers}
-A general-purpose GP was trained with $\beta=8$ over the full grid using 12 random seeds plus the start/end states $(3.42,0.75)$ and $(11.0,2.1)$. The RMSE against the EMT grid dropped below \SI{0.05}{eV} after about 60 acquisitions and reached a minimum of \SI{0.041}{eV} (final \SI{0.044}{eV}) after 120 acquisitions (134 total training points including seeds), see Fig.~\ref{fig:rmse}.
+A general-purpose GP was trained with $\beta=8$ over the full grid using 12 random seeds plus the start/end states $(3.42,0.75)$ and $(11.0,2.1)$. The RMSE against the EMT grid dropped below \SI{0.05}{eV} after about 60 acquisitions and reached a minimum of \SI{0.040}{eV} (final \SI{0.040}{eV}) after 120 acquisitions (134 total training points including seeds), see Fig.~\ref{fig:rmse}.
 
-The diffusion path between the minima was sampled with 120 relaxed points. The true EMT barrier is \SI{0.88}{eV}. The GP from Bayesian optimization underestimates the barrier (\SI{0.63}{eV}) because it focuses on the low-energy basin, while the exploratory GP gives \SI{0.86}{eV} with credible intervals spanning the ridge (Fig.~\ref{fig:path}).
+The diffusion path between the minima was sampled with 120 relaxed points. The true EMT barrier is \SI{0.88}{eV}. The GP from Bayesian optimization underestimates the barrier (\SI{0.63}{eV}) because it focuses on the low-energy basin, while the exploratory GP gives \SI{0.87}{eV} with credible intervals spanning the ridge (Fig.~\ref{fig:path}).
 
 \begin{figure}[h]
     \centering

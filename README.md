@@ -25,8 +25,8 @@
   ## Results (executed)
   - Global min: x=3.42 Å, y=0.75 Å, E=0.228 eV.
   - Local search: 2/250 hits (0.8%).
-  - BO: β=2.0 best robustness (100% hits ~21 iterations); large β over-explores.
-  - Exploratory GP: RMSE ≈0.041–0.044 eV vs EMT grid; path barrier ≈0.86 eV (true EMT 0.88 eV).
+  - BO: β=2.0 best robustness (100% hits ~20 iterations); large β over-explores.
+  - Exploratory GP: RMSE ≈0.040 eV vs EMT grid; path barrier ≈0.87 eV (true EMT 0.88 eV).
 
   ## Reproducibility
   - Data/figures in `artifacts/`.
