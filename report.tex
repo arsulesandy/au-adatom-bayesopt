@@ -83,7 +83,7 @@ Bayesian optimization starts from five random samples and runs $35$ acquisitions
     \label{tab:bo}
 \end{table}
 
-Fig.~\ref{fig:bo} shows convergence and the posterior for the best-performing run ($\beta=2.0$). The GP variance is largest near unsampled ridges and deep hollows; the acquisition targets those regions while still refining around the terrace minimum. The global minimum was typically identified by $\sim25$ EMT evaluations (initial five plus roughly 20 BO iterations) in successful runs.
+Fig.~\ref{fig:bo} shows convergence and the posterior for the best-performing seed ($\beta=1.2$, seed 0), while $\beta=2.0$ remains the most reliable overall. The GP variance is largest near unsampled ridges and deep hollows; the acquisition targets those regions while still refining around the terrace minimum. The global minimum was typically identified by $\sim25$ EMT evaluations (initial five plus roughly 20 BO iterations) in successful runs.
 
 \begin{figure}[h]
     \centering
@@ -94,9 +94,9 @@ Fig.~\ref{fig:bo} shows convergence and the posterior for the best-performing ru
 \end{figure}
 
 \section{Task 4: GP for transition barriers}
-A general-purpose GP was trained with $\beta=8$ over the full grid using 12 random seeds plus the start/end states $(3.42,0.75)$ and $(11.0,2.1)$. The RMSE against the EMT grid dropped below \SI{0.05}{eV} after about 60 acquisitions and to \SI{0.035}{eV} after 120 acquisitions (134 total training points including seeds), see Fig.~\ref{fig:rmse}.
+A general-purpose GP was trained with $\beta=8$ over the full grid using 12 random seeds plus the start/end states $(3.42,0.75)$ and $(11.0,2.1)$. The RMSE against the EMT grid dropped below \SI{0.05}{eV} after about 60 acquisitions and reached a minimum of \SI{0.041}{eV} (final \SI{0.044}{eV}) after 120 acquisitions (134 total training points including seeds), see Fig.~\ref{fig:rmse}.
 
-The diffusion path between the minima was sampled with 120 relaxed points. The true EMT barrier is \SI{0.88}{eV}. The GP from Bayesian optimization underestimates the barrier (\SI{0.63}{eV}) because it focuses on the low-energy basin, while the exploratory GP reproduces the barrier (\SI{0.88}{eV}) with credible intervals spanning the ridge (Fig.~\ref{fig:path}).
+The diffusion path between the minima was sampled with 120 relaxed points. The true EMT barrier is \SI{0.88}{eV}. The GP from Bayesian optimization underestimates the barrier (\SI{0.63}{eV}) because it focuses on the low-energy basin, while the exploratory GP gives \SI{0.86}{eV} with credible intervals spanning the ridge (Fig.~\ref{fig:path}).
 
 \begin{figure}[h]
     \centering
@@ -118,9 +118,9 @@ The dense EMT grid provides a clear reference, but local search alone almost alw
 \section{Reproducibility}
 \begin{itemize}
     \item A Python~3.12 virtual environment with all dependencies resides in \texttt{assignments/project-2b/.venv312}.
-    \item To regenerate the notebook and figures, run:\\
-    \texttt{JUPYTER\_CONFIG\_DIR=assignments/project-2b/artifacts/jupyter\_config\\JUPYTER\_DATA\_DIR=assignments/project-2b/artifacts/jupyter\_data\\JUPYTER\_RUNTIME\_DIR=assignments/project-2b/artifacts/jupyter\_runtime\\assignments/project-2b/.venv312/bin/jupyter nbconvert --to notebook --execute --inplace assignments/project-2b/project2b\_bayesopt\_solution.ipynb}
-    \item Key metrics are collected in \texttt{assignments/project-2b/artifacts/summary.json}.
+    \item To regenerate the notebook and figures from the repository root, run:\\
+    \texttt{JUPYTER\_CONFIG\_DIR=artifacts/jupyter\_config\\JUPYTER\_DATA\_DIR=artifacts/jupyter\_data\\JUPYTER\_RUNTIME\_DIR=artifacts/jupyter\_runtime\\MPLCONFIGDIR=artifacts/mplconfig\\assignments/project-2b/.venv312/bin/jupyter nbconvert --to notebook --execute --inplace project2b\_bayesopt\_solution.ipynb}
+    \item Key metrics are collected in \texttt{artifacts/summary.json}.
 \end{itemize}
 
 \end{document}

@@ -4,30 +4,31 @@
   search, Bayesian optimization sweeps over β, and exploratory GP modeling of diffusion barriers.
 
   ## Layout
-  - assignments/project-2b/project2b_bayesopt_solution.ipynb — executed notebook with code, figures, and summary outputs.
-  - assignments/project-2b/report.tex — report ready for LaTeX compilation.
-  - assignments/project-2b/artifacts/ — cached PES grid, figures, and summary metrics.
+  - project2b_bayesopt_solution.ipynb — executed notebook with code, figures, and summary outputs under `artifacts/`.
+  - report.tex — report ready for LaTeX compilation.
+  - artifacts/ — cached PES grid, figures, and summary metrics.
   - assignments/project-2b/.venv312/ — Python 3.12 virtual environment with dependencies.
 
   ## Quick start
   1) Activate the venv: `source assignments/project-2b/.venv312/bin/activate`
   2) Re-run notebook (from repo root):
 
-  JUPYTER_CONFIG_DIR=assignments/project-2b/artifacts/jupyter_config \
-  JUPYTER_DATA_DIR=assignments/project-2b/artifacts/jupyter_data \
-  JUPYTER_RUNTIME_DIR=assignments/project-2b/artifacts/jupyter_runtime \
+  JUPYTER_CONFIG_DIR=artifacts/jupyter_config \
+  JUPYTER_DATA_DIR=artifacts/jupyter_data \
+  JUPYTER_RUNTIME_DIR=artifacts/jupyter_runtime \
+  MPLCONFIGDIR=artifacts/mplconfig \
   assignments/project-2b/.venv312/bin/jupyter nbconvert --to notebook --execute --inplace \
-  assignments/project-2b/project2b_bayesopt_solution.ipynb --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=7200
+  project2b_bayesopt_solution.ipynb --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=7200
 
-  3) Build the report: `pdflatex assignments/project-2b/report.tex` (or `latexmk`).
+  3) Build the report: `pdflatex report.tex` (or `latexmk`).
 
   ## Results (executed)
   - Global min: x=3.42 Å, y=0.75 Å, E=0.228 eV.
   - Local search: 2/250 hits (0.8%).
   - BO: β=2.0 best robustness (100% hits ~21 iterations); large β over-explores.
-  - Exploratory GP: RMSE ≈0.035 eV vs EMT grid; path barrier 0.88 eV (matches EMT).
+  - Exploratory GP: RMSE ≈0.041–0.044 eV vs EMT grid; path barrier ≈0.86 eV (true EMT 0.88 eV).
 
   ## Reproducibility
-  - Data/figures in `assignments/project-2b/artifacts/`.
-  - Metrics in `assignments/project-2b/artifacts/summary.json`.
+  - Data/figures in `artifacts/`.
+  - Metrics in `artifacts/summary.json`.
   - Code and text explanations live in the notebook; the LaTeX report summarizes methods and findings.
